@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Honeypot Attack Feed</title>
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background: #1e1e2e; color: #cdd6f4; padding: 20px; }
+        h1 { color: #f9e2af; }
+        .attack { background: #313244; margin: 6px 0; padding: 10px; border-left: 4px solid #f38ba8; border-radius: 4px; }
+        .timestamp { color: #89b4fa; }
+        .ip { color: #a6e3a1; }
+        .geo { color: #f9e2af; }
+        .details { color: #cdd6f4; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>🍯 Honeypot Attack Feed</h1>
+    <div id="alerts"></div>
+
+    <script>
+        const socket = io('http://127.0.0.1:5001');
+        const alertsDiv = document.getElementById('alerts');
+
+        socket.on('connect', () => console.log('Connected'));
+        socket.on('honeypot_alert', (data) => {
+            const el = document.createElement('div');
+            el.className = 'attack';
+            const geo = data.geo;
+            el.innerHTML = `
+                <div><span class="timestamp">${data.timestamp}</span> 
+                <span class="ip">${data.src_ip}</span> 
+                (${geo.country}, ${geo.city})</div>
+                <div class="details">[${data.type}] ${data.details}</div>
+            `;
+            alertsDiv.prepend(el);
+            while (alertsDiv.children.length > 50) alertsDiv.removeChild(alertsDiv.lastChild);
+        });
+    </script>
+</body>
+</html>
